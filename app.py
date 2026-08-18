@@ -2,8 +2,11 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
-from src.aligner import ImageAligner
-from src.mapper import CoordinateMapper
+
+# 使用重构后的新子模块路径
+from src.registration.automatic import FeatureRegistrator
+from src.mapping.coordinate import CoordinateMapper
+from src.transform.affine import AffineTransformer
 
 # 页面基础配置
 st.set_page_config(
@@ -23,7 +26,7 @@ src_file = st.sidebar.file_uploader("Fluorescence Image (Source)", type=["png", 
 tgt_file = st.sidebar.file_uploader("Electron Microscopy Image (Target)", type=["png", "jpg", "jpeg", "tif", "tiff"])
 
 st.sidebar.header("2. Registration Parameters")
-reg_method = st.sidebar.selectbox("Registration Method", ["SIFT", "ORB", "Manual Points"])
+reg_method = st.sidebar.selectbox("Registration Method", ["SIFT", "ORB"])
 
 if src_file and tgt_file:
     # 1. 加载并转换图像
@@ -33,49 +36,31 @@ if src_file and tgt_file:
     src_img = np.array(src_pil)
     tgt_img = np.array(tgt_pil)
 
-    # 显示原始图像 (已修改参数为 use_container_width)
+    # 显示原始图像
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Fluorescence View")
-        st.image(src_img, use_container_width=True)
+        st.image(src_img, width="stretch")
     with col2:
         st.subheader("Electron Microscopy View")
-        st.image(tgt_img, use_container_width=True)
+        st.image(tgt_img, width="stretch")
 
     st.divider()
     st.header("⚡ Image Registration & Alignment")
 
-    aligner = ImageAligner(method=reg_method)
+    registrator = FeatureRegistrator(method=reg_method)
     aligned_img = None
     matrix = None
 
-    if reg_method in ["SIFT", "ORB"]:
-        try:
-            with st.spinner("Calculating affine transformation matrix..."):
-                aligned_img, matrix = aligner.align_automatic(src_img, tgt_img)
-            st.success("✅ Automatic Affine Registration Successful!")
-        except Exception as e:
-            st.error(f"❌ Registration Failed: {str(e)}")
-            st.info("Tip: Try switching to 'Manual Points' mode if cross-modal contrast difference is too high.")
-    else:
-        st.subheader("Manual Control Points (Fiducial Markers)")
-        st.info("Provide at least 3 pairs of matching coordinates (x, y) between Fluorescence and EM images.")
-
-        # 默认示例 3 点
-        col_pts1, col_pts2 = st.columns(2)
-        with col_pts1:
-            p1_src = st.text_input("Fluorescence Points (x,y)", "50,50; 200,50; 100,200")
-        with col_pts2:
-            p1_tgt = st.text_input("EM Points (x',y')", "60,55; 210,52; 108,205")
-
-        if st.button("Run Manual Registration"):
-            try:
-                src_pts = [tuple(map(float, p.split(','))) for p in p1_src.split(';')]
-                tgt_pts = [tuple(map(float, p.split(','))) for p in p1_tgt.split(';')]
-                aligned_img, matrix = aligner.align_from_points(src_img, src_pts, tgt_pts, tgt_img.shape)
-                st.success("✅ Manual Keypoint Registration Successful!")
-            except Exception as e:
-                st.error(f"Error parsing points: {str(e)}")
+    try:
+        with st.spinner("Calculating affine transformation matrix..."):
+            # 1. 计算 2x3 仿射变换矩阵
+            matrix = registrator.compute_affine_matrix(src_img, tgt_img)
+            # 2. 对源图像施加 Warp 几何变换
+            aligned_img = AffineTransformer.apply_warp(src_img, matrix, tgt_img.shape)
+        st.success("✅ Automatic Affine Registration Successful!")
+    except Exception as e:
+        st.error(f"❌ Registration Failed: {str(e)}")
 
     # 2. 坐标映射与融合预览
     if aligned_img is not None and matrix is not None:
@@ -101,8 +86,12 @@ if src_file and tgt_file:
 
         with col_res:
             st.subheader("EM Target Location Overlay")
-            marked_em = mapper.draw_mapped_marker(tgt_img, (target_x, target_y), label="POI")
-            st.image(marked_em, use_container_width=True)
+            marked_em = tgt_img.copy()
+            pt_x, pt_y = int(round(target_x)), int(round(target_y))
+            cv2.circle(marked_em, (pt_x, pt_y), 10, (0, 0, 255), 2)
+            cv2.drawMarker(marked_em, (pt_x, pt_y), (0, 0, 255), markerType=cv2.MARKER_CROSS, markerSize=20,
+                           thickness=2)
+            st.image(marked_em, width="stretch")
 
         st.divider()
         st.header("🎛️ Dual-Channel Fusion View (Alpha Overlay)")
@@ -111,7 +100,7 @@ if src_file and tgt_file:
 
         # 融合图计算
         fusion_img = cv2.addWeighted(aligned_img, alpha, tgt_img, 1 - alpha, 0)
-        st.image(fusion_img, caption=f"Overlay Fusion (Alpha: {alpha:.2f})", use_container_width=True)
+        st.image(fusion_img, caption=f"Overlay Fusion (Alpha: {alpha:.2f})", width="stretch")
 
 else:
     st.info("👈 Please upload both a Fluorescence and an EM image from the sidebar to start alignment.")
