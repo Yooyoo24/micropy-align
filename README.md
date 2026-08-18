@@ -10,6 +10,12 @@ In Correlative Light and Electron Microscopy (CLEM), researchers identify functi
 
 ---
 
+## 🎬 Demo Preview
+
+![Demo](micropy-align-demo.gif)
+
+---
+
 ## 🔄 CLEM Workflow
 
 ```text
@@ -20,13 +26,9 @@ In Correlative Light and Electron Microscopy (CLEM), researchers identify functi
                                                                              └──► [ Dual-Channel Fusion View (Alpha Overlay) ]
 ---
 
-## 🎬 Demo Preview
+## 🧮 Mathematical
 
-![Demo](micropy-align-demo.gif)
-
----
-
-##🧮 Mathematical ModelCross-modal image alignment is modeled using a 2D Affine Transformation Matrix $M \in \mathbb{R}^{2 \times 3}$:$$\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} a_{11} & a_{12} & t_x \\ a_{21} & a_{22} & t_y \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$Forward Mapping: Transforms fluorescence pixel coordinates $(x, y)$ to EM target location $(x', y')$.Inverse Mapping: Uses $M^{-1}$ (augmented $3 \times 3$) to map EM coordinates back to the fluorescence domain.
+ModelCross-modal image alignment is modeled using a 2D Affine Transformation Matrix $M \in \mathbb{R}^{2 \times 3}$:$$\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} a_{11} & a_{12} & t_x \\ a_{21} & a_{22} & t_y \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$Forward Mapping: Transforms fluorescence pixel coordinates $(x, y)$ to EM target location $(x', y')$.Inverse Mapping: Uses $M^{-1}$ (augmented $3 \times 3$) to map EM coordinates back to the fluorescence domain.
 
 ---
 
@@ -68,7 +70,7 @@ pytest
 
 ---
 
-##⚠️ Limitations
+## ⚠️ Limitations
 Extreme Modality Contrast: If cross-modal contrast varies too drastically for SIFT/ORB feature matching, manual fiducial points are recommended.
 
 2D Rigid/Affine Assumption: The engine assumes planar 2D transformations; non-linear local deformations (e.g., sample shrinkage) require non-rigid registration (e.g., B-spline).
