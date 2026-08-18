@@ -1,7 +1,23 @@
 # 🔬 MicroPy-Align: CLEM Image Registration & Coordinate Mapping Engine
 
-An open-source Python tool designed for Correlative Light and Electron Microscopy (CLEM) workflows, providing automated image alignment (SIFT/ORB), fiducial-based manual affine transformations, and cross-modal coordinate mapping with real-time UI.
+An open-source, modular Python framework designed for Correlative Light and Electron Microscopy (CLEM) workflows. It provides automated image registration, 2D physical coordinate transformation, and real-time dual-channel fusion visualization.
 
+---
+
+## 🎯 Motivation
+
+In Correlative Light and Electron Microscopy (CLEM), researchers identify functional points of interest (POIs) under a fluorescence microscope and navigate to the exact nanoscale structures under an electron microscope (EM). Due to rotational, scale, and translational discrepancies between the two imaging modalities, manual alignment is error-prone. **MicroPy-Align** automates cross-modal image registration and stage coordinate mapping.
+
+---
+
+## 🔄 CLEM Workflow
+
+```text
+[ Fluorescence Image ] ──┐
+                         ├──► [ Registration (SIFT/ORB/Fiducials) ] ──► Affine Matrix (2x3)
+[ Electron Microscopy ]  ──┘                                                 │
+                                                                             ├──► [ Coordinate Mapping (x,y) -> (x',y') ]
+                                                                             └──► [ Dual-Channel Fusion View (Alpha Overlay) ]
 ---
 
 ## 🎬 Demo Preview
@@ -10,56 +26,54 @@ An open-source Python tool designed for Correlative Light and Electron Microscop
 
 ---
 
-## 🌟 Key Features
-
-- **Multi-Modal Image Registration**:
-  - **Automatic Registration**: Employs SIFT/ORB feature detection and RANSAC for automatic affine matrix calculations.
-  - **Manual Fiducial Alignment**: Fallback mechanism using matching control points for low-contrast/cross-modal images.
-- **Precision Stage Navigation & Coordinate Mapping**:
-  - Calculates $2 \times 3$ Affine Transformation Matrices to map $2D$ coordinates $(x, y) \to (x', y')$ from fluorescence targets to electron microscopy frames.
-- **Interactive Dual-Channel Overlay**:
-  - Real-time Streamlit Web UI with adjustable Alpha transparency slider for seamless fusion visualization.
+##🧮 Mathematical ModelCross-modal image alignment is modeled using a 2D Affine Transformation Matrix $M \in \mathbb{R}^{2 \times 3}$:$$\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} a_{11} & a_{12} & t_x \\ a_{21} & a_{22} & t_y \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$Forward Mapping: Transforms fluorescence pixel coordinates $(x, y)$ to EM target location $(x', y')$.Inverse Mapping: Uses $M^{-1}$ (augmented $3 \times 3$) to map EM coordinates back to the fluorescence domain.
 
 ---
 
 ## 🏗️ Project Architecture
 
-```text
-Fluorescence Image + EM Image ──► Streamlit Web UI (app.py)
-                                           │
-                    ┌──────────────────────┴──────────────────────┐
-                    ▼                                             ▼
-       [ImageAligner (SIFT/ORB/Fiducials)]       [CoordinateMapper Engine]
-                    │                                             │
-                    ▼                                             ▼
-          Affine Matrix (2x3) ──────────────────►  Cross-Modal Coordinates (x', y')
-                    │
-                    ▼
-          Dual-Channel Fusion View (Alpha Overlay)
+micropy-align/
+├── src/
+│   ├── registration/      # SIFT/ORB automatic & manual fiducial algorithms
+│   ├── transform/         # Affine transformations & image warping
+│   ├── mapping/           # Forward and inverse coordinate conversion
+│   └── visualization/     # Marker overlays & opacity blending
+├── tests/                 # Automated pytest test suite
+├── examples/              # Standalone CLI python scripts
+├── Dockerfile             # Containerized deployment spec
+└── app.py                 # Streamlit web UI
 
 ---
 
-## 🛠️ Tech Stack
-Computer Vision: OpenCV, NumPy, SciPy
-
-Frontend / Interaction: Streamlit
-
-Image Processing: Pillow, Matplotlib
-
----
-
-## 🚀 Quick Start
-1. Clone & Setup
+## 📦 Installation & Quick Start
+Local Setup
 git clone [https://github.com/Yooyoo24/micropy-align.git](https://github.com/Yooyoo24/micropy-align.git)
 cd micropy-align
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-2. Run Application
+Run Streamlit Web Application
 streamlit run app.py
+
+Run via Docker
+docker build -t micropy-align .
+docker run -p 8501:8501 micropy-align
 
 ---
 
-## 📝 License
+## 🧪 Testing
+Run unit tests to verify coordinate transformations:
+pytest
+
+---
+
+##⚠️ Limitations
+Extreme Modality Contrast: If cross-modal contrast varies too drastically for SIFT/ORB feature matching, manual fiducial points are recommended.
+
+2D Rigid/Affine Assumption: The engine assumes planar 2D transformations; non-linear local deformations (e.g., sample shrinkage) require non-rigid registration (e.g., B-spline).
+
+---
+
+##📝 License
 Distributed under the MIT License.
