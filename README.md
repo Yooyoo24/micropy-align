@@ -21,9 +21,9 @@ In Correlative Light and Electron Microscopy (CLEM), researchers identify functi
 ```text
 [ Fluorescence Image ] ──┐
                          ├──► [ Registration (SIFT/ORB/Fiducials) ] ──► Affine Matrix (2x3)
-[ Electron Microscopy ]  ──┘                                                 │
+[ Electron Microscopy ]──┘                                                   │
                                                                              ├──► [ Coordinate Mapping (x,y) -> (x',y') ]
-                                                                             └──► [ Dual-Channel Fusion View (Alpha Overlay) ]
+                                                                             └──► [ Dual-Channel Fusion View (Alpha Overlay) ]```
 
 ---
 
