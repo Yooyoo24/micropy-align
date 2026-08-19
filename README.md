@@ -1,22 +1,22 @@
-# 🔬 MicroPy-Align: CLEM Image Registration & Coordinate Mapping Engine
+# MicroPy-Align: CLEM Image Registration & Coordinate Mapping Engine
 
 An open-source, modular Python framework designed for Correlative Light and Electron Microscopy (CLEM) workflows. It provides automated image registration, 2D physical coordinate transformation, and real-time dual-channel fusion visualization.
 
 ---
 
-## 🎯 Motivation
+## Motivation
 
 In Correlative Light and Electron Microscopy (CLEM), researchers identify functional points of interest (POIs) under a fluorescence microscope and navigate to the exact nanoscale structures under an electron microscope (EM). Due to rotational, scale, and translational discrepancies between the two imaging modalities, manual alignment is error-prone. **MicroPy-Align** automates cross-modal image registration and stage coordinate mapping.
 
 ---
 
-## 🎬 Demo Preview
+## Demo Preview
 
 ![Demo](micropy-align-demo.gif)
 
 ---
 
-## 🔄 CLEM Workflow
+## CLEM Workflow
 
 ```text
 [ Fluorescence Image ] ──┐
@@ -24,15 +24,16 @@ In Correlative Light and Electron Microscopy (CLEM), researchers identify functi
 [ Electron Microscopy ]  ──┘                                                 │
                                                                              ├──► [ Coordinate Mapping (x,y) -> (x',y') ]
                                                                              └──► [ Dual-Channel Fusion View (Alpha Overlay) ]
+
 ---
 
-## 🧮 Mathematical
+## Mathematical
 
 ModelCross-modal image alignment is modeled using a 2D Affine Transformation Matrix $M \in \mathbb{R}^{2 \times 3}$:$$\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} a_{11} & a_{12} & t_x \\ a_{21} & a_{22} & t_y \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$Forward Mapping: Transforms fluorescence pixel coordinates $(x, y)$ to EM target location $(x', y')$.Inverse Mapping: Uses $M^{-1}$ (augmented $3 \times 3$) to map EM coordinates back to the fluorescence domain.
 
 ---
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 micropy-align/
 ├── src/
@@ -45,9 +46,10 @@ micropy-align/
 ├── Dockerfile             # Containerized deployment spec
 └── app.py                 # Streamlit web UI
 
+
 ---
 
-## 📦 Installation & Quick Start
+## Installation & Quick Start
 Local Setup
 git clone [https://github.com/Yooyoo24/micropy-align.git](https://github.com/Yooyoo24/micropy-align.git)
 cd micropy-align
@@ -64,18 +66,18 @@ docker run -p 8501:8501 micropy-align
 
 ---
 
-## 🧪 Testing
+## Testing
 Run unit tests to verify coordinate transformations:
 pytest
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 Extreme Modality Contrast: If cross-modal contrast varies too drastically for SIFT/ORB feature matching, manual fiducial points are recommended.
 
 2D Rigid/Affine Assumption: The engine assumes planar 2D transformations; non-linear local deformations (e.g., sample shrinkage) require non-rigid registration (e.g., B-spline).
 
 ---
 
-##📝 License
+## License
 Distributed under the MIT License.
