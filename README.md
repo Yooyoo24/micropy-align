@@ -36,7 +36,7 @@ ModelCross-modal image alignment is modeled using a 2D Affine Transformation Mat
 ---
 
 ## Project Architecture
-
+```
 micropy-align/
 ├── src/
 │   ├── registration/      # SIFT/ORB automatic & manual fiducial algorithms
@@ -47,7 +47,7 @@ micropy-align/
 ├── examples/              # Standalone CLI python scripts
 ├── Dockerfile             # Containerized deployment spec
 └── app.py                 # Streamlit web UI
-
+```
 
 ---
 
